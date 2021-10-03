@@ -1,2 +1,2 @@
 # basicsfs
-Basic Secure File Sharing Applet
+Basic Secure File Sharing Program
