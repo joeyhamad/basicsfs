@@ -7,6 +7,8 @@ import java.util.Scanner;
 
 public class clientutils {
 
+// Test comment for test commit 
+
 	public static final int KEY_SIZE_AES = 128;
 	
 	public static void printByteArray(String msg, byte[] byteArray) { //used for debugging
