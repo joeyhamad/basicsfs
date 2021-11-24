@@ -1,13 +1,20 @@
 package com.csproj.Server;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 public class serverutils {
 
     public static final int KEY_SIZE_AES = 128;
+    private BigInteger generator;
+    public BigInteger publicKey;
+    public BigInteger sharedSecret;
+    public BigInteger privateKey;
+    public BigInteger modulus;
 
     public static void printByteArray(String msg, byte[] byteArray) { //used for debugging
         System.out.println(msg);
@@ -22,6 +29,53 @@ public class serverutils {
         }
         System.out.println(result.toString());
     }
+
+//
+//        private void generatePublicPrivateKeys(){
+//        this.publicKey = BigInteger.probablePrime(KEY_SIZE_AES, new Random());
+//        this.generator = BigInteger.probablePrime(KEY_SIZE_AES, new Random());;
+//    }
+//    private void dhexcahnge(BigInteger clientPublic){
+//        BigInteger sharedSecret;
+//
+//        sharedSecret = publicKey.modPow()
+//
+//// A = g^a mod p
+//        // g is public integer
+//        // a is our private key
+//        // p is our shared modulus
+//        BigInteger A = generator.modPow(this.privateKey, this.modulus);
+//
+//    }
+
+
+//    public static void splitFile(File f) throws IOException {
+//        int partCounter = 1;
+//
+//        int sizeOfFiles = 32;// 1MB
+//        byte[] buffer = new byte[sizeOfFiles];
+//
+//        String fileName = f.getName();
+//
+//        //try-with-resources to ensure closing stream
+//        try (FileInputStream fis = new FileInputStream(f);
+//             BufferedInputStream bis = new BufferedInputStream(fis)) {
+//
+//            int bytesAmount = 0;
+//            while ((bytesAmount = bis.read(buffer)) > 0) {
+//                //write each chunk of data into separate file with different number in name
+//                String filePartName = String.format("%s.%03d", fileName, partCounter++);
+//                File newFile = new File(f.getParent(), filePartName);
+//                try (FileOutputStream out = new FileOutputStream(newFile)) {
+//                    out.write(buffer, 0, bytesAmount);
+//                }
+//            }
+//        }
+//    }
+//
+//    public static void main(String[] args) throws IOException {
+//        splitFile(new File("D:\\destination\\myFile.mp4"));
+//    }
 
     /**
      * Forwards the bytes from one stream to another
@@ -55,7 +109,6 @@ public class serverutils {
             remaining -= readAmount;
         }
     }
-
 
     /**
      * Consumes just the ASCII encoded header from the stream (but leaves the body untouched). This also includes consuming
