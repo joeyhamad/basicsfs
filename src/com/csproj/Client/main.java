@@ -1,23 +1,21 @@
-package com.csproj;
-
-import com.csproj.Client.clientutils;
+package com.csproj.Client;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
+import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+public class main {
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
-public class Main {
+        dhclient clientDH = new dhclient();
+        String secretKeyClient = clientDH.initConnection();
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         String homedir = System.getProperty("user.home");
-	    String srcfile = homedir + "/Documents/testdocs/testdoc";
+        String srcfile = homedir + "/Documents/testdocs/testdoc";
         String outputEncryptedfile = homedir + "/Documents/testdocs/encryptedDoc";
         String outputDecryptedfile = homedir + "/Documents/testdocs/decryptedDoc";
 
@@ -27,6 +25,8 @@ public class Main {
 
         // Create client instance
         clientutils Client = new clientutils();
+        BigInteger sharedSecret = new BigInteger(secretKeyClient);
+        Client.sharedKey = sharedSecret.toByteArray();
 
         // Read test file to byte array
         byte[] testarray = Client.readFileToByteArray(tr);
@@ -54,20 +54,20 @@ public class Main {
         System.arraycopy(decryptedBytes, 0, finalArray, 0, testarray.length);
 
         // Check if original and new byte array is equal
-        System.out.println("Are original and decrypted file equal?:  "  + compareByteArrays(testarray, finalArray));
+        System.out.println("Are original and decrypted file equal?:  " + compareByteArrays(testarray, finalArray));
 
         // Read bytes to new file
         Client.readByteArrayToFile(finalArray, outputDecryptedfile);
 
     }
 
-    public static void testArrayCopyMechanism(clientutils Client, byte[] arrayToTest){
+    public static void testArrayCopyMechanism(clientutils Client, byte[] arrayToTest) {
         ArrayList<byte[]> splitByteArrayList = Client.splitByteArrayToArrayList(arrayToTest);
         byte[] joinedArray = Client.joinArrayListToByteArray(splitByteArrayList);
 
         System.out.println("Joined data array length: " + joinedArray.length);
 
-        if(Arrays.equals(arrayToTest, joinedArray)){
+        if (Arrays.equals(arrayToTest, joinedArray)) {
             System.out.println("Arrays are the same...");
         } else {
             System.out.println("Hmmm....they're not the same...");
@@ -78,3 +78,4 @@ public class Main {
         return Arrays.equals(file1, file2);
     }
 }
+

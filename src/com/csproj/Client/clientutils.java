@@ -88,8 +88,6 @@ public class clientutils {
 	/**
 	 *
 	 * @param byteArray byteArray to be encrypted
-	 * @param chunkSize
-	 * @param initialKey Key to use for encryption
 	 * @return
 	 */
 	// ORIGINAL FUNCTION HEADER FOR LATER: public ArrayList<byte[]> encryptByteArray(byte[] byteArray, int chunkSize, String initialKey) throws NoSuchAlgorithmException {
@@ -98,7 +96,6 @@ public class clientutils {
 		ArrayList<byte[]> splitByteArrayList = splitByteArrayToArrayList(byteArray);
 		// Split file into individual 32 byte arrays to perform operations on
 
-
 		// Generate initialization vector
 		Random rd = new Random();
 		byte[] arr = new byte[32];
@@ -106,10 +103,11 @@ public class clientutils {
 
 		// DEBUGGING
 		// Generate random key for testing, disable this for final product!
-		Random rd2 = new Random();
-		byte[] sharedKey = new byte[16];
-		rd2.nextBytes(sharedKey);
-		this.sharedKey = sharedKey.clone();
+//		Random rd2 = new Random();
+//		byte[] sharedKey = new byte[16];
+//		rd2.nextBytes(sharedKey);
+//		this.sharedKey = sharedKey.clone();
+		byte[] sharedKey = this.sharedKey;
 
 		// Copy to key + initialization vector to new 48 byte array
 		byte[] initVector = new byte[48];
