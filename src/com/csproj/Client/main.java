@@ -7,57 +7,104 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class main {
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InterruptedException {
 
+        String optionSelect = "3";
+
+        while(!optionSelect.equals("1") && !optionSelect.equals("2")) {
+            System.out.println("""
+                    Select mode of operation:
+                    1. Send files in ./toServer
+                    2. Retrieve stored files in server and save in ./fromServer
+                    """);
+
+            Scanner scanner = new Scanner(System.in);
+            optionSelect = scanner.nextLine();
+        }
+
+        switch(optionSelect){
+            case "1":
+                System.out.println("Initiating file transfer of files in ./toServer to the server.");
+                break;
+            case "2":
+                System.out.println("Transferring files from server to ./fromServer directory");
+                break;
+            default:
+                System.out.println("No valid options selected. Terminating program...");
+                return;
+        }
+
+        String secretKeyClient = "empty";
         dhclient clientDH = new dhclient();
-        String secretKeyClient = clientDH.initConnection();
+
+        while(!clientDH.isConnected) {
+            try {
+                 secretKeyClient = clientDH.initConnection();
+                 Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println("Server not found...trying again...");
+                Thread.sleep(1000);
+            }
+        }
 
         String homedir = System.getProperty("user.home");
         String srcfile = homedir + "/Documents/testdocs/testdoc";
-        String outputEncryptedfile = homedir + "/Documents/testdocs/encryptedDoc";
-        String outputDecryptedfile = homedir + "/Documents/testdocs/decryptedDoc";
+        String testdocuments = System.getProperty("user.dir") + "/testdocs/";
+        String srcfolder = System.getProperty("user.dir") + "/toServer/";
+        String destfolder = System.getProperty("user.dir") + "/fromServer/";
 
         // Find file to test
-        File testdoc = new File(srcfile);
-        RandomAccessFile tr = new RandomAccessFile(testdoc, "rw");
+        File testdir = new File(testdocuments);
+        String[] filepaths = testdir.list();
 
-        // Create client instance
-        clientutils Client = new clientutils();
-        BigInteger sharedSecret = new BigInteger(secretKeyClient);
-        Client.sharedKey = sharedSecret.toByteArray();
+        for(String filename : filepaths){
+            System.out.println("Working on file: " + filename);
+            File testdoc = new File(testdocuments + filename);
+            String outputEncryptedfile = filename + "_encrypted";
+            String outputDecryptedfile = filename + "_decrypted";
 
-        // Read test file to byte array
-        byte[] testarray = Client.readFileToByteArray(tr);
+            RandomAccessFile tr = new RandomAccessFile(testdoc, "rw");
 
-        // Pad array with zeroes to have a whole number amount of 32 byte blocks
-        int paddedArrayLength = testarray.length + (32 - (testarray.length % 32));
-        byte[] paddedArray = new byte[paddedArrayLength];
-        // pad zeros
-        System.arraycopy(testarray, 0, paddedArray, 0, testarray.length);
+            // Create client instance
+            clientutils Client = new clientutils();
+            BigInteger sharedSecret = new BigInteger(secretKeyClient);
+            Client.sharedKey = sharedSecret.toByteArray();
 
-        // Debug - show some useful information
-        System.out.println("Data byte array length: " + testarray.length);
-        System.out.println("Padded data array length: " + paddedArray.length);
-        testArrayCopyMechanism(Client, paddedArray);
+            // Read test file to byte array
+            byte[] testarray = Client.readFileToByteArray(tr);
 
-        // Encrypt the byte array and read the encrypted array to a file
-        byte[] encryptedBytes = Client.encryptByteArray(paddedArray);
-        Client.readByteArrayToFile(encryptedBytes, outputEncryptedfile);
+            // Pad array with zeroes to have a whole number amount of 32 byte blocks
+            int paddedArrayLength = testarray.length + (32 - (testarray.length % 32));
+            byte[] paddedArray = new byte[paddedArrayLength];
+            // pad zeros
+            System.arraycopy(testarray, 0, paddedArray, 0, testarray.length);
 
-        // Decrypt the file
-        byte[] decryptedBytes = Client.decryptByteArray(encryptedBytes, Client.sharedKey, Client.initVectorHash);
+            // Debug - show some useful information
+            System.out.println("Data byte array length: " + testarray.length);
+            System.out.println("Padded data array length: " + paddedArray.length);
+            testArrayCopyMechanism(Client, paddedArray);
 
-        // Remove padded bytes to match original file
-        byte[] finalArray = new byte[testarray.length];
-        System.arraycopy(decryptedBytes, 0, finalArray, 0, testarray.length);
+            // Encrypt the byte array and read the encrypted array to a file
+            byte[] encryptedBytes = Client.encryptByteArray(paddedArray);
+            Client.readByteArrayToFile(encryptedBytes, srcfolder + outputEncryptedfile);
 
-        // Check if original and new byte array is equal
-        System.out.println("Are original and decrypted file equal?:  " + compareByteArrays(testarray, finalArray));
+            // Decrypt the file
+            byte[] decryptedBytes = Client.decryptByteArray(encryptedBytes, Client.sharedKey, Client.initVectorHash);
 
-        // Read bytes to new file
-        Client.readByteArrayToFile(finalArray, outputDecryptedfile);
+            // Remove padded bytes to match original file
+            byte[] finalArray = new byte[testarray.length];
+            System.arraycopy(decryptedBytes, 0, finalArray, 0, testarray.length);
+
+            // Check if original and new byte array is equal
+            System.out.println("Are original and decrypted file equal?:  " + compareByteArrays(testarray, finalArray));
+
+            // Read bytes to new file
+            Client.readByteArrayToFile(finalArray, destfolder + outputDecryptedfile);
+
+        }
 
     }
 

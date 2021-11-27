@@ -4,10 +4,13 @@ import java.math.BigInteger;
 import java.net.*;
 import java.io.*;
 import java.util.Random;
+import java.util.Scanner;
 
 public class dhclient {
 
-    public static String initConnection()
+    boolean isConnected = false;
+
+    public String initConnection() throws ConnectException
     {
         try {
             String serverName = "localhost";
@@ -20,13 +23,20 @@ public class dhclient {
 
             String serverB;
             BigInteger sharedSecretKey;
+            Socket client;
 
             // Established the connection
-            System.out.println("Connecting to " + serverName
-                    + " on port " + port);
-            Socket client = new Socket(serverName, port);
-            System.out.println("Just connected to "
-                    + client.getRemoteSocketAddress());
+            try {
+                System.out.println("Connecting to " + serverName
+                        + " on port " + port);
+                client = new Socket(serverName, port);
+                System.out.println("Just connected to "
+                        + client.getRemoteSocketAddress());
+
+                this.isConnected = true;
+            } catch(ConnectException e){
+                throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
+            }
 
             // Sends the data to client
             OutputStream outToServer = client.getOutputStream();
