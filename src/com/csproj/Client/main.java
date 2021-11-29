@@ -4,17 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
+import java.net.ConnectException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class main {
-    public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InterruptedException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InterruptedException, ConnectException {
 
         String optionSelect = "3";
 
-        while(!optionSelect.equals("1") && !optionSelect.equals("2")) {
+        while (!optionSelect.equals("1") && !optionSelect.equals("2")) {
             System.out.println("""
                     Select mode of operation:
                     1. Send files in ./toServer
@@ -25,7 +26,7 @@ public class main {
             optionSelect = scanner.nextLine();
         }
 
-        switch(optionSelect){
+        switch (optionSelect) {
             case "1":
                 System.out.println("Initiating file transfer of files in ./toServer to the server.");
                 break;
@@ -39,15 +40,21 @@ public class main {
 
         String secretKeyClient = "empty";
         dhclient clientDH = new dhclient();
-
-        while(!clientDH.isConnected) {
+        int j = 1;
+        while (!clientDH.isConnected && j <= 10) {
             try {
-                 secretKeyClient = clientDH.initConnection();
-                 Thread.sleep(1000);
+                System.out.println("Connection attempt #" + j + "/10");
+                secretKeyClient = clientDH.initConnection();
+                Thread.sleep(1000);
+                j++;
             } catch (Exception e) {
-                System.out.println("Server not found...trying again...");
+                System.out.println("Server not found...trying again...Attempt #" + j + "/10");
                 Thread.sleep(1000);
             }
+        }
+
+        if (j > 10){
+            throw new ConnectException("Aborting program, no connection established.");
         }
 
         String homedir = System.getProperty("user.home");
@@ -60,7 +67,7 @@ public class main {
         File testdir = new File(testdocuments);
         String[] filepaths = testdir.list();
 
-        for(String filename : filepaths){
+        for (String filename : filepaths) {
             System.out.println("Working on file: " + filename);
             File testdoc = new File(testdocuments + filename);
             String outputEncryptedfile = filename + "_encrypted";

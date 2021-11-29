@@ -10,8 +10,7 @@ public class dhclient {
 
     boolean isConnected = false;
 
-    public String initConnection() throws ConnectException
-    {
+    public String initConnection() throws ConnectException {
         try {
             String serverName = "localhost";
             int port = 8088;
@@ -32,7 +31,6 @@ public class dhclient {
                 client = new Socket(serverName, port);
                 System.out.println("Just connected to "
                         + client.getRemoteSocketAddress());
-
                 this.isConnected = true;
             } catch(ConnectException e){
                 throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
@@ -67,8 +65,7 @@ public class dhclient {
             client.close();
 
             return sharedSecretKey.toString();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return "empty";
         }
