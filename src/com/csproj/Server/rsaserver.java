@@ -1,9 +1,11 @@
-package com.csproj.Client;
+
+package com.csproj.Server;
 
 import javax.crypto.Cipher;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.ConnectException;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -11,12 +13,10 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 
-public class rsaclient {
+public class rsaserver {
 
     private PrivateKey privateKey;
     private PublicKey publicKey;
-
-    public boolean isConnected = false;
 
     private String PRIVATE_KEY_STRING = "";
     private String PUBLIC_KEY_STRING = "";
@@ -25,59 +25,49 @@ public class rsaclient {
     private static final String known_hosts_path = System.getProperty("user.dir") + "/known_hosts";
 
 
-    public rsaclient() throws IOException {
+    public rsaserver() throws IOException {
         init();
     }
 
-    public void rsaPublicKeyExchange(String serverIP, int serverPort) throws IOException {
-        String serverName = serverIP;
+    public void rsaPublicKeyExchange(String clientIP, int serverPort) throws IOException {
         int port = serverPort;
-        String serverPublicKey = "";
-        Socket client;
+        String clientPublicKey = "";
 
-        // Established the connection
-        try {
-            System.out.println("Connecting to " + serverName
-                    + " on port " + port);
-            client = new Socket(serverName, port);
-            System.out.println("Just connected to "
-                    + client.getRemoteSocketAddress());
-            this.isConnected = true;
-        } catch (ConnectException e) {
-            throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
+        ServerSocket serverSocket = new ServerSocket(port);
+        System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
+        Socket server = serverSocket.accept();
+        System.out.println("Just connected to " + server.getRemoteSocketAddress());
+
+
+        String known_hosts_file = readFileContents(known_hosts_path);
+        OutputStream outToClient = server.getOutputStream();
+        DataOutputStream out = new DataOutputStream(outToClient);
+        DataInputStream in = new DataInputStream(server.getInputStream());
+
+        // First the client will tell me if it needs my public key.
+
+        String clientResp = in.readUTF();
+        System.out.println("From Client: " + clientResp);
+        if (clientResp.contains("SEND PUBLIC KEY")) {
+            out.writeUTF(PUBLIC_KEY_STRING);
         }
 
-        // Do I need the server's host key?
-        String known_hosts_file = readFileContents(known_hosts_path);
-        OutputStream outToServer = client.getOutputStream();
-        DataOutputStream out = new DataOutputStream(outToServer);
-        DataInputStream in = new DataInputStream(client.getInputStream());
-
+        // Do I need the client's host key?
         if (known_hosts_file.length() < 3) {
             // I need server's public key
             out.writeUTF("SEND PUBLIC KEY");
-            System.out.println("Requested public key from the server");
+            System.out.println("Requested public key from the client");
 
             // Now server will send me their public key
-            String serverResp = in.readUTF();
-            System.out.println("From Server: Public Key = " + serverResp);
-            writeKnownHosts(serverIP, serverResp);
+            clientResp = in.readUTF();
+            System.out.println("From Client: Public Key = " + clientResp);
+            writeKnownHosts(clientIP, clientResp);
         } else {
             // Tell server not to send me the public key
             out.writeUTF("I DONT NEED YOUR PUBLIC KEY");
         }
-
-        // Now server will tell me if it needs my public key.
-        String serverResp = in.readUTF();
-        System.out.println("From Server: " + serverResp);
-        if (serverResp.contains("SEND PUBLIC KEY")) {
-            out = new DataOutputStream(outToServer);
-            out.writeUTF(PUBLIC_KEY_STRING);
-        }
-
         in.close();
         out.close();
-        this.isConnected = false;
     }
 
     public void init() throws IOException {
@@ -120,64 +110,6 @@ public class rsaclient {
         } catch (Exception ignored) {
         }
     }
-
-    public void getServerPublicKey(String serverIP, int serverPort) throws IOException {
-        String serverName = serverIP;
-        int port = serverPort;
-        String serverPublicKey = "";
-        Socket client;
-
-        // Established the connection
-        try {
-            System.out.println("Connecting to " + serverName
-                    + " on port " + port);
-            client = new Socket(serverName, port);
-            System.out.println("Just connected to "
-                    + client.getRemoteSocketAddress());
-
-        } catch (IOException e) {
-            throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
-        }
-
-        // Accepts the data
-        DataInputStream in = new DataInputStream(client.getInputStream());
-
-        String pubKey = in.readUTF();
-
-        System.out.println("From Server: Public Key = " + pubKey);
-
-        client.close();
-
-        writeKnownHosts(serverIP, pubKey);
-    }
-
-    public void sendPublicKey(String serverIP, int serverPort) throws IOException {
-        String serverName = serverIP;
-        int port = serverPort;
-        String serverPublicKey = "";
-        Socket client;
-
-        // Established the connection
-        try {
-            System.out.println("Connecting to " + serverName
-                    + " on port " + port);
-            client = new Socket(serverName, port);
-            System.out.println("Just connected to "
-                    + client.getRemoteSocketAddress());
-
-        } catch (IOException e) {
-            throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
-        }
-
-        // Sends the data to client
-        OutputStream outToServer = client.getOutputStream();
-        DataOutputStream out = new DataOutputStream(outToServer);
-
-        out.writeUTF(PUBLIC_KEY_STRING);
-        out.close();
-        System.out.println("Sent public key: " + PUBLIC_KEY_STRING);
-    }
-
 
     public void initFromStrings() {
         try {

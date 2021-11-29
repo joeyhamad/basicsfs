@@ -38,18 +38,39 @@ public class main {
                 return;
         }
 
+        // Test RSA first
+        int j = 1;
+        rsaclient rsaclient = new rsaclient();
+        rsaclient.rsaPublicKeyExchange("localhost", 8808);
+//        while (!rsaclient.isConnected && j <= 10) {
+//            try {
+//                System.out.println("Connection attempt #" + j + "/10");
+//                rsaclient.rsaPublicKeyExchange("localhost", 8808);
+//                Thread.sleep(5000);
+//                j++;
+//            } catch (Exception e) {
+//                System.out.println("Server not found...trying again...Attempt #" + j + "/10");
+//                j++;
+//                Thread.sleep(5000);
+//            }
+//        }
+//
+//        if (j > 10){
+//            throw new ConnectException("Aborting program, no connection established.");
+//        }
+
         String secretKeyClient = "empty";
         dhclient clientDH = new dhclient();
-        int j = 1;
+        j = 1;
         while (!clientDH.isConnected && j <= 10) {
             try {
                 System.out.println("Connection attempt #" + j + "/10");
                 secretKeyClient = clientDH.initConnection();
-                Thread.sleep(1000);
+                Thread.sleep(5000);
                 j++;
             } catch (Exception e) {
                 System.out.println("Server not found...trying again...Attempt #" + j + "/10");
-                Thread.sleep(1000);
+                Thread.sleep(5000);
             }
         }
 
