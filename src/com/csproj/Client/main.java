@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.math.BigInteger;
 import java.net.ConnectException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,14 +80,19 @@ public class main {
         }
 
         String homedir = System.getProperty("user.home");
-        String srcfile = homedir + "/Documents/testdocs/testdoc";
         String testdocuments = System.getProperty("user.dir") + "/testdocs/";
+        String hashlistpath = System.getProperty("user.dir") + "/hashes.list";
         String srcfolder = System.getProperty("user.dir") + "/toServer/";
         String destfolder = System.getProperty("user.dir") + "/fromServer/";
 
         // Find file to test
         File testdir = new File(testdocuments);
         String[] filepaths = testdir.list();
+        MessageDigest sha = MessageDigest.getInstance("SHA-256");
+        // Create client instance
+        clientutils Client = new clientutils();
+        String hashlist = Client.readFileContents(hashlistpath);
+
 
         for (String filename : filepaths) {
             System.out.println("Working on file: " + filename);
@@ -96,13 +102,18 @@ public class main {
 
             RandomAccessFile tr = new RandomAccessFile(testdoc, "rw");
 
-            // Create client instance
-            clientutils Client = new clientutils();
             BigInteger sharedSecret = new BigInteger(secretKeyClient);
             Client.sharedKey = sharedSecret.toByteArray();
 
             // Read test file to byte array
             byte[] testarray = Client.readFileToByteArray(tr);
+            byte[] testarrayhash = sha.digest(testarray);
+            String hashstr = String.format("%032X", new BigInteger(1, testarrayhash));
+            System.out.println("HASH BEFORE: "+ hashstr);
+            if(!hashlist.contains(hashstr)){
+                System.out.println("Hey look, a new file! Let's write its hash to the hash list.");
+                Client.writeToFile(System.getProperty("user.dir") + "/hashes.list", hashstr);
+            }
 
             // Pad array with zeroes to have a whole number amount of 32 byte blocks
             int paddedArrayLength = testarray.length + (32 - (testarray.length % 32));
@@ -129,9 +140,19 @@ public class main {
             // Check if original and new byte array is equal
             System.out.println("Are original and decrypted file equal?:  " + compareByteArrays(testarray, finalArray));
 
-            // Read bytes to new file
-            Client.readByteArrayToFile(finalArray, destfolder + outputDecryptedfile);
+            // Verify that decrypted file hash matches original file hash
+            hashlist = Client.readFileContents(hashlistpath);
+            String decryptedFileHash = String.format("%032X", new BigInteger(1, sha.digest(finalArray)));
 
+            System.out.println("HASH AFTER: "+ decryptedFileHash);
+
+            if(hashlist.contains(decryptedFileHash)){
+                System.out.println("Hey, I recognize this file from somewhere!");
+                // Read bytes to new file
+                Client.readByteArrayToFile(finalArray, destfolder + outputDecryptedfile);
+            } else{
+                System.out.println("Looks like we received some bad data....I won't save this file for you.");
+            }
         }
 
     }

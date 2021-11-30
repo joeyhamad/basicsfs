@@ -85,6 +85,31 @@ public class clientutils {
 		return returnedArray;
 	}
 
+	public String readFileContents(String filePath) throws IOException {
+		File file = new File(filePath);
+		FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
+		String line = "";
+		String fileContents = "";
+
+		while ((line = br.readLine()) != null) {
+			fileContents += line + "\n";
+		}
+
+		br.close();
+		fr.close();
+
+		return fileContents;
+	}
+
+	public void writeToFile(String filepath, String contentToWrite) throws IOException {
+		String strToWrite = contentToWrite + "\n";
+		FileOutputStream os = new FileOutputStream(filepath, true);
+		byte[] strToBytes = strToWrite.getBytes();
+		os.write(strToBytes);
+		os.close();
+	}
+
 	/**
 	 *
 	 * @param byteArray byteArray to be encrypted
