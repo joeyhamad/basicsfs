@@ -1,5 +1,4 @@
 package Manasa;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.util.ArrayList;
@@ -11,6 +10,7 @@ import java.io.*;
 import java.net.*;
 
 public class client {
+    static ArrayList<String> fileNames = new ArrayList<>();
     static ArrayList<MyFile> myFiles = new ArrayList<>();
     public static void main(String[] args) throws IOException{
         int fileId = 0;
@@ -52,35 +52,50 @@ public class client {
                     DataInputStream dataInputStream = new DataInputStream(s.getInputStream());
                     int fileCount = dataInputStream.readInt();
 
-                    //System.out.println("Came in download.addActionListener; Count: "+fileCount);
+                    System.out.println("Came in download.addActionListener; Count: "+fileCount);
                     for (int i=0; i<fileCount; i++) {
                         int fileNameLength = dataInputStream.readInt();
                         byte[] fileNameBytes = new byte[fileNameLength];
                         dataInputStream.readFully(fileNameBytes, 0, fileNameBytes.length);
                         String fileName = new String(fileNameBytes);
-                        int fileContentLength = dataInputStream.readInt();
-                        byte[] fileContentBytes = new byte[fileContentLength];
-                        dataInputStream.readFully(fileContentBytes, 0, fileContentLength); 
-
-                        JPanel jpFileRow = new JPanel();
-                        jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
-
-                        JLabel jFileName = new JLabel("<html><br>" + fileName + "<br></html>");
-                        jFileName.setFont(new Font("Arial", Font.BOLD, 20));
-
-                        jpFileRow.setName(String.valueOf(fileId));
-
-                        jpFileRow.add(jFileName);
-                        jP.add(jpFileRow);
-                        jF.validate();
                         
-                        myFiles.add(new MyFile(fileId, fileName, fileContentBytes, getFileExtension(fileName)));
-                        String fileClient = "/Users/manasakandala/UTD/Net Sec/Project/FTP Connection/Client/" + fileName; 
-                        File fileDownload = new File(fileClient);
-                        FileOutputStream fileOutputStream = new FileOutputStream(fileDownload);
-                        fileOutputStream.write(fileContentBytes);
-                        fileOutputStream.close();
+                        if(i>0) {
+                            System.out.println("Name: "+ fileName);
+                            fileNames.add(fileName);
+                        }
+
+                        // int fileContentLength = dataInputStream.readInt();
+                        // byte[] fileContentBytes = new byte[fileContentLength];
+                        // dataInputStream.readFully(fileContentBytes, 0, fileContentLength); 
+
+                        // JPanel jpFileRow = new JPanel();
+                        // jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
+
+                        // JLabel jFileName = new JLabel("<html><br>" + fileName + "<br></html>");
+                        // jFileName.setFont(new Font("Arial", Font.BOLD, 20));
+
+                        // jpFileRow.setName(String.valueOf(fileId));
+
+                        // jpFileRow.add(jFileName);
+                        // jP.add(jpFileRow);
+                        // jF.validate();
+                        
+                        
+                        // myFiles.add(new MyFile(fileId, fileName, fileContentBytes, getFileExtension(fileName)));
+                        // String fileClient = "/Users/manasakandala/UTD/Net Sec/Project/FTP Connection/Client/" + fileName; 
+                        // File fileDownload = new File(fileClient);
+                        // FileOutputStream fileOutputStream = new FileOutputStream(fileDownload);
+                        // fileOutputStream.write(fileContentBytes);
+                        // fileOutputStream.close();
                     }
+
+                    for(int i=0; i<fileNames.size(); i++) {
+                        System.out.println(fileNames.get(i));
+                    }
+
+                    //ArrayList testlist = new ArrayList<String>();
+                    FilesServer filesServer = new FilesServer();;
+                    String file = filesServer.listfiles();
                     
 
                 } catch (IOException error) {
