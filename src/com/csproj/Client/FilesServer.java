@@ -13,7 +13,10 @@ import java.awt.*;
 
 
 public class FilesServer {
-    public static String listfiles() {
+    public static String listfiles(ArrayList<String> fileNames) {
+
+        int fileId = 0;
+
         String str = "";
 
         JFrame jList = new JFrame();
@@ -38,19 +41,19 @@ public class FilesServer {
         // for(int i=0; i<fileNames.size(); i++) {
         //     System.out.println(fileNames);
         // }
+        for (int i = 0; i < fileNames.size(); i++) {
+            JPanel jpFileRow = new JPanel();
+            jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
 
-        // JPanel jpFileRow = new JPanel();
-        // jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
+            JLabel jFileName = new JLabel((String) fileNames.get(i));
+            jFileName.setFont(new Font("Arial", Font.BOLD, 20));
 
+            jpFileRow.setName(String.valueOf(fileId));
 
-        // JLabel jFileName = new JLabel(fileName);
-        // jFileName.setFont(new Font("Arial", Font.BOLD, 20));
-
-        // jpFileRow.setName(String.valueOf(fileId));
-
-        // jpFileRow.add(jFileName);
-        // jP.add(jpFileRow);
-        // jF.validate();
+            jpFileRow.add(jFileName);
+            jPanel.add(jpFileRow);
+        }
+        jList.validate();
 
         return str;
     }

@@ -99,10 +99,8 @@ public class clientWindow {
                         dataInputStream.readFully(fileNameBytes, 0, fileNameBytes.length);
                         String fileName = new String(fileNameBytes);
 
-                        if (i > 0) {
-                            System.out.println("Name: " + fileName);
-                            fileNames.add(fileName);
-                        }
+                        System.out.println("Name: " + fileName);
+                        fileNames.add(fileName);
 
                         // int fileContentLength = dataInputStream.readInt();
                         // byte[] fileContentBytes = new byte[fileContentLength];
@@ -129,13 +127,9 @@ public class clientWindow {
                         // fileOutputStream.close();
                     }
 
-                    for (int i = 0; i < fileNames.size(); i++) {
-                        System.out.println(fileNames.get(i));
-                    }
-
                     //ArrayList testlist = new ArrayList<String>();
                     FilesServer filesServer = new FilesServer();
-                    String file = filesServer.listfiles();
+                    String file = filesServer.listfiles(fileNames);
 
                 } catch (IOException error) {
                     error.printStackTrace();

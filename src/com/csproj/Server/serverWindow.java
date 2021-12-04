@@ -79,7 +79,7 @@ public class serverWindow {
 
                 } else {
                     //System.out.println("Download case entered");
-                    File files[] = new File("/Users/manasakandala/UTD/Net Sec/Project/FTP Connection/Server/").listFiles();
+                    File files[] = new File(destfolder).listFiles();
 
                     DataOutputStream dataOutputStream = new DataOutputStream(s.getOutputStream());
                     dataOutputStream.writeInt(files.length);
@@ -101,8 +101,8 @@ public class serverWindow {
                         dataOutputStream.writeInt(fileNameBytes.length);
                         dataOutputStream.write(fileNameBytes);
 
-                        dataOutputStream.writeInt(fileContentBytes.length);
-                        dataOutputStream.write(fileContentBytes);
+//                        dataOutputStream.writeInt(fileContentBytes.length);
+//                        dataOutputStream.write(fileContentBytes);
 
                     }
                 }
