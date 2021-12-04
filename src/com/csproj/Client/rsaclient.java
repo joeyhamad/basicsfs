@@ -77,6 +77,7 @@ public class rsaclient {
 
         in.close();
         out.close();
+        client.close();
         this.isConnected = false;
     }
 
@@ -121,32 +122,30 @@ public class rsaclient {
         }
     }
 
-    public void getServerPublicKey(String serverIP, int serverPort) throws IOException {
+    public void getServerPublicKey(Socket client, String serverIP, int serverPort) throws IOException {
         String serverName = serverIP;
         int port = serverPort;
         String serverPublicKey = "";
-        Socket client;
 
-        // Established the connection
-        try {
-            System.out.println("Connecting to " + serverName
-                    + " on port " + port);
-            client = new Socket(serverName, port);
-            System.out.println("Just connected to "
-                    + client.getRemoteSocketAddress());
-
-        } catch (IOException e) {
-            throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
-        }
+//        // Established the connection
+//        try {
+//            System.out.println("Connecting to " + serverName
+//                    + " on port " + port);
+//            client = new Socket(serverName, port);
+//            System.out.println("Just connected to "
+//                    + client.getRemoteSocketAddress());
+//
+//        } catch (IOException e) {
+//            throw new ConnectException("Please ensure that server is running on port 8808 and retry the connection.");
+//        }
 
         // Accepts the data
         DataInputStream in = new DataInputStream(client.getInputStream());
-
         String pubKey = in.readUTF();
 
         System.out.println("From Server: Public Key = " + pubKey);
 
-        client.close();
+//        client.close();
 
         writeKnownHosts(serverIP, pubKey);
     }

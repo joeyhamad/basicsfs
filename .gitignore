@@ -24,3 +24,7 @@ hs_err_pid*
 
 # IntelliJ .idea filder
 .idea/**
+
+# out files
+src/com/csproj/Server/out/*
+src/com/csproj/Client/out/*

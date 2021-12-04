@@ -53,6 +53,7 @@ public class dhserver {
             System.out.println("Secret Key to perform Symmetric Encryption = "
                     + sharedSecretKey);
             server.close();
+            serverSocket.close();
             return sharedSecretKey.toString();
         }
 

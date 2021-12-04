@@ -88,6 +88,7 @@ public class main {
         // Find file to test
         File testdir = new File(testdocuments);
         String[] filepaths = testdir.list();
+
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         // Create client instance
         clientutils Client = new clientutils();

@@ -142,4 +142,24 @@ public class serverutils {
         scanner.close();
         return headerParts;
     }
+
+    public File readByteArrayToFile(byte[] arrayToWrite, String outputFilePath) throws IOException {
+        try {
+            File file = new File(outputFilePath);
+            file.createNewFile();
+            System.out.println("File: " + file);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
+            fos.write(arrayToWrite);
+            //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
+        } catch(Exception e){
+            FileOutputStream fos = new FileOutputStream(outputFilePath);
+            fos.write(0x01);
+        }
+
+        return new File(outputFilePath);
+    }
 }

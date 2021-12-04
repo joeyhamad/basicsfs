@@ -38,7 +38,6 @@ public class rsaserver {
         Socket server = serverSocket.accept();
         System.out.println("Just connected to " + server.getRemoteSocketAddress());
 
-
         String known_hosts_file = readFileContents(known_hosts_path);
         OutputStream outToClient = server.getOutputStream();
         DataOutputStream out = new DataOutputStream(outToClient);
@@ -68,6 +67,8 @@ public class rsaserver {
         }
         in.close();
         out.close();
+        server.close();
+        serverSocket.close();
     }
 
     public void init() throws IOException {
