@@ -68,18 +68,11 @@ public class serverWindow {
                         jpFileRow.add(jFileName);
                         jP.add(jpFileRow);
                         jF.validate();
-
-//                        myFiles.add(new MyFile(fileId, fileName, fileContentBytes, getFileExtension(fileName)));
-//                        String fileServer = "/Users/manasakandala/UTD/Net Sec/Project/FTP Connection/Server/" + fileName;
-//                        File fileDownload = new File(fileServer);
-//                        FileOutputStream fileOutputStream = new FileOutputStream(fileDownload);
-//                        fileOutputStream.write(fileContentBytes);
-//                        fileOutputStream.close();
                     }
 
                 } else {
                     //System.out.println("Download case entered");
-                    File files[] = new File("/Users/manasakandala/UTD/Net Sec/Project/FTP Connection/Server/").listFiles();
+                    File files[] = new File(destfolder).listFiles();
 
                     DataOutputStream dataOutputStream = new DataOutputStream(s.getOutputStream());
                     dataOutputStream.writeInt(files.length);
@@ -90,20 +83,32 @@ public class serverWindow {
 
 
                     for (int i = 0; i < files.length; i++) {
-                        FileInputStream fileInputStream = new FileInputStream(files[i]);
-
                         String fileName = files[i].getName();
                         byte[] fileNameBytes = fileName.getBytes();
 
-                        byte[] fileContentBytes = new byte[(int) files[i].length()];
-                        fileInputStream.read(fileContentBytes);
-
                         dataOutputStream.writeInt(fileNameBytes.length);
                         dataOutputStream.write(fileNameBytes);
+                    }
+                    int fileNeededLen = dataInputStream.readInt();
+                    byte[] fileNeeded = new byte[fileNeededLen];
+                    dataInputStream.readFully(fileNeeded, 0, fileNeeded.length);
+                    String fileNamegot = new String(fileNeeded);
+                    
+                    System.out.println(fileNamegot);
+                    
+                    for(int i=0; i<files.length; i++) {
+                        if(files[i].getName().equals(fileNamegot)) {
+                            System.out.println("Found the file: "+files[i].getName());
 
-                        dataOutputStream.writeInt(fileContentBytes.length);
-                        dataOutputStream.write(fileContentBytes);
+                            byte[] fileContentBytes = new byte[(int) files[i].length()];
+                            FileInputStream fileInputStream = new FileInputStream(files[i]);
+                            fileInputStream.read(fileContentBytes);
 
+                            dataOutputStream.writeInt(fileContentBytes.length);
+                            dataOutputStream.write(fileContentBytes);
+
+                            break;
+                        }
                     }
                 }
 

@@ -1,20 +1,28 @@
 package com.csproj.Client;
 
 import javax.swing.*;
-// import javax.swing.border.EmptyBorder;
-// import java.util.ArrayList;
+import javax.swing.border.EmptyBorder;
+import java.util.ArrayList;
 
 import java.util.ArrayList;
 import java.awt.*;
-// import java.awt.event.ActionEvent;
-// import java.awt.event.ActionListener;
-// import java.io.*;
-// import java.net.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.net.*;
+import java.awt.event.MouseListener;
 
 
 public class FilesServer {
-    public static String listfiles() {
-        String str = "";
+
+    public interface FileSelectionListener {
+        void onFileSelected(String fileName);
+    }
+
+    public static void listfiles(ArrayList<String> fileNames, FileSelectionListener fileListener) {
+
+        int fileId = 0;
 
         JFrame jList = new JFrame();
         jList.setSize(500, 500);
@@ -38,20 +46,38 @@ public class FilesServer {
         // for(int i=0; i<fileNames.size(); i++) {
         //     System.out.println(fileNames);
         // }
+       
 
-        // JPanel jpFileRow = new JPanel();
-        // jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
+        JPanel jpFileRow = new JPanel();
+        jpFileRow.setLayout(new BoxLayout(jpFileRow, BoxLayout.Y_AXIS));
 
+        for(int i=0; i<fileNames.size(); i++) {
+            String name  = (i+1) +". "+ fileNames.get(i);
+            JLabel jFileName = new JLabel(name);
+            jFileName.setFont(new Font("Arial", Font.BOLD, 20));
 
-        // JLabel jFileName = new JLabel(fileName);
-        // jFileName.setFont(new Font("Arial", Font.BOLD, 20));
+            jpFileRow.setName(String.valueOf(fileId++));
 
-        // jpFileRow.setName(String.valueOf(fileId));
+            jpFileRow.add(jFileName);
+            jPanel.add(jpFileRow);
+        }
+        
+        JTextArea jTextArea = new JTextArea();
+        JButton button = new JButton("Get File");
+        jpFileRow.add(jTextArea);
+        jpFileRow.add(button);
+        jList.validate();
 
-        // jpFileRow.add(jFileName);
-        // jP.add(jpFileRow);
-        // jF.validate();
+        button.addActionListener(new ActionListener(){
 
-        return str;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int num = Integer.parseInt(jTextArea.getText());
+                System.out.println(num);
+                String str = fileNames.get(num-1);
+                fileListener.onFileSelected(str); 
+                // jList.close();               
+            }   
+        });
     }
 }
