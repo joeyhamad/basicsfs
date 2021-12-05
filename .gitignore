@@ -18,6 +18,7 @@
 *.zip
 *.tar.gz
 *.rar
+*.DS_Store
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -28,3 +29,14 @@ hs_err_pid*
 # out files
 src/com/csproj/Server/out/*
 src/com/csproj/Client/out/*
+src/Manasa/*
+src/com/csproj/Client/toServer
+src/com/csproj/Client/fromServer
+src/com/csproj/Server/fromClient
+src/com/csproj/Server/known_hosts
+src/com/csproj/Server/public.pub
+src/com/csproj/Server/private.pem
+src/com/csproj/Client/known_hosts
+src/com/csproj/Client/public.pub
+src/com/csproj/Cleitn/private.pem
+
