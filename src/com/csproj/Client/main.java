@@ -14,6 +14,7 @@ import java.util.Scanner;
 public class main {
     public static void main(String[] args) throws NoSuchAlgorithmException, IOException, InterruptedException, ConnectException {
 
+        clientutils Client = new clientutils();
         String optionSelect = "3";
 
         while (!optionSelect.equals("1") && !optionSelect.equals("2")) {
@@ -60,13 +61,15 @@ public class main {
 //            throw new ConnectException("Aborting program, no connection established.");
 //        }
 
+
+
         String secretKeyClient = "empty";
         dhclient clientDH = new dhclient();
         j = 1;
         while (!clientDH.isConnected && j <= 10) {
             try {
                 System.out.println("Connection attempt #" + j + "/10");
-                secretKeyClient = clientDH.initConnection();
+                secretKeyClient = clientDH.initConnection(Client);
                 Thread.sleep(5000);
                 j++;
             } catch (Exception e) {
@@ -91,7 +94,6 @@ public class main {
 
         MessageDigest sha = MessageDigest.getInstance("SHA-256");
         // Create client instance
-        clientutils Client = new clientutils();
         String hashlist = Client.readFileContents(hashlistpath);
 
 

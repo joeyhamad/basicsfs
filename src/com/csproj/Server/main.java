@@ -6,9 +6,10 @@ import java.security.NoSuchAlgorithmException;
 public class main {
 
     public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
+        serverutils Server = new serverutils();
         rsaserver rsaserver = new rsaserver();
         rsaserver.rsaPublicKeyExchange("localhost", 8808);
         dhserver serverDH = new dhserver();
-        String secretkeyServer = serverDH.initConnection();
+        String secretkeyServer = serverDH.initConnection(Server);
     }
 }

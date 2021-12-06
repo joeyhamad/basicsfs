@@ -10,7 +10,7 @@ public class dhclient {
 
     boolean isConnected = false;
 
-    public String initConnection() throws ConnectException {
+    public String initConnection(clientutils Client) throws ConnectException {
         try {
             String serverName = "localhost";
             int port = 8088;
@@ -64,6 +64,7 @@ public class dhclient {
                     + sharedSecretKey);
             client.close();
 
+            Client.sharedKey = sharedSecretKey.toByteArray();
             return sharedSecretKey.toString();
         } catch (Exception e) {
             e.printStackTrace();

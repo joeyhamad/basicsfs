@@ -4,9 +4,8 @@ import java.net.*;
 import java.io.*;
 import java.util.Random;
 
-
 public class dhserver {
-    public static String initConnection() throws IOException
+    public static String initConnection(serverutils Server) throws IOException
     {
         try {
             int port = 8088;
@@ -54,6 +53,7 @@ public class dhserver {
                     + sharedSecretKey);
             server.close();
             serverSocket.close();
+            Server.secretKeyBytes = sharedSecretKey.toByteArray();
             return sharedSecretKey.toString();
         }
 

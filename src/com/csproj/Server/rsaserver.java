@@ -29,8 +29,8 @@ public class rsaserver {
         init();
     }
 
-    public void rsaPublicKeyExchange(String clientIP, int serverPort) throws IOException {
-        int port = serverPort;
+    public void rsaPublicKeyExchange(String clientIP, int clientPort) throws IOException {
+        int port = clientPort;
         String clientPublicKey = "";
 
         ServerSocket serverSocket = new ServerSocket(port);
