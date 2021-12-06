@@ -15,6 +15,7 @@ import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.Random;
 
 
 public class clientWindow {
@@ -27,6 +28,7 @@ public class clientWindow {
     static String destfolder = System.getProperty("user.dir") + "/fromServer/";
     static byte[] initVectorHash;
     static byte[] sharedSecretKey;
+    static BigInteger nonce;
 
     public static void main(String[] args) throws IOException, InterruptedException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         clientutils Client = new clientutils();
@@ -36,7 +38,10 @@ public class clientWindow {
 
         validator Validator = new validator();
 
-        Validator.challengeExchange("localhost", 8088);
+        BigInteger challenge = BigInteger.probablePrime(128, new Random());
+        nonce = challenge;
+
+        Validator.challengeExchange(challenge,"localhost", 8088);
 
         String secretKeyClient = "empty";
         dhclient clientDH = new dhclient();
@@ -91,6 +96,7 @@ public class clientWindow {
                 Socket s = new Socket("localhost", 8088);
                 DataOutputStream dataOutputStream = new DataOutputStream(s.getOutputStream());
                 dataOutputStream.writeInt(0);
+                Validator.sendTimestamp(dataOutputStream, "localhost");
 
                 // Server tells me how many files are there
                 DataInputStream dataInputStream = new DataInputStream(s.getInputStream());
@@ -110,6 +116,8 @@ public class clientWindow {
 
             } catch (IOException | InterruptedException error) {
                 error.printStackTrace();
+            } catch (Exception err){
+                err.printStackTrace();
             }
         });
 
@@ -194,6 +202,8 @@ public class clientWindow {
                 // Send the number of files to the server
                 dataOutputStream.writeInt(numFilesToSend);
 
+                Validator.sendTimestamp(dataOutputStream, "localhost");
+
                 for (String filename : filepaths) {
                     System.out.println("Working on file: " + filename);
 
@@ -227,7 +237,11 @@ public class clientWindow {
             } catch (IOException e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
+            } catch (Exception e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
             }
+
         });
         jF.add(jP);
         jF.setVisible(true);

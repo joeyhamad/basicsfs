@@ -2,12 +2,10 @@ package com.csproj.Client;
 
 import javax.crypto.Cipher;
 import java.io.*;
-import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
 

@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -67,12 +68,16 @@ public class serverWindow {
                 System.out.println("Read data from the server. I just read: " + numberOfFiles);
 
                 switch (numberOfFiles) {
-                    case 0: sendFilesToClient(s, dataInputStream, new DataOutputStream((s.getOutputStream())), Server); break;
-                    default: downloadIncomingFiles(s, dataInputStream, jP, jF, numberOfFiles, Server); break;
+                    case 0:
+                        Validator.receiveTimestamp(dataInputStream, "localhost");
+                        sendFilesToClient(s, dataInputStream, new DataOutputStream((s.getOutputStream())), Server); break;
+                    default:
+                        Validator.receiveTimestamp(dataInputStream, "localhost");
+                        downloadIncomingFiles(s, dataInputStream, jP, jF, numberOfFiles, Server); break;
                 }
 
                 dataInputStream.close();
-            } catch (IOException e1) {
+            } catch (IOException | InterruptedException | ParseException e1) {
                 e1.printStackTrace();
             }
         }

@@ -9,11 +9,14 @@ import java.math.BigInteger;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
-import java.util.Random;
+import java.util.Date;
 
 public class validator {
 
@@ -24,13 +27,16 @@ public class validator {
     public boolean isConnected = false;
 
     private static final String known_hosts_path = System.getProperty("user.dir") + "/known_hosts";
+    private static final String private_key_path = System.getProperty("user.dir") + "/private.pem";
+    private static final String public_key_path = System.getProperty("user.dir") + "/public.pub";
+    static BigInteger currentChallenge;
 
-
-    public void challengeExchange(String serverIP, int serverPort) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InterruptedException {
+    public void challengeExchange(BigInteger challenge, String serverIP, int serverPort) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InterruptedException {
         String serverName = serverIP;
         int port = serverPort;
         Socket client;
 
+        currentChallenge = challenge;
 
         // Established the connection
         try {
@@ -54,9 +60,9 @@ public class validator {
 
         String publicKeyString = known_hosts_entry.split(" ")[1];
         System.out.println("You found the public key: " + publicKeyString);
-        initFromStrings(publicKeyString);
+        initPublicKeyFromString(publicKeyString);
 
-        BigInteger challenge = BigInteger.probablePrime(128, new Random());
+
         System.out.println("Generated challenge is " + challenge.toString());
 
         // Send a challenge to the server using its public key
@@ -91,6 +97,30 @@ public class validator {
         this.isConnected = false;
     }
 
+    public void sendTimestamp(DataOutputStream dos, String serverIP) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InterruptedException {
+
+        // Read host file for server's public key and initiate data streams
+        String known_hosts_entry = readSpecificLine(known_hosts_path, serverIP);
+        String PRIVATE_KEY_STRING = readLine(private_key_path);
+
+        String publicKeyString = known_hosts_entry.split(" ")[1];
+        System.out.println("You found the public key: " + publicKeyString);
+        initPublicKeyFromString(publicKeyString);
+        initPrviateKeyFromString(PRIVATE_KEY_STRING);
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy.MM.dd.HH:mm:ss");
+        String timeStamp = date.format(new Date());
+        System.out.println("Generated timestamp is " + timeStamp);
+
+        Cipher cipher = Cipher.getInstance("RSA"); //setting algo to RSA
+        cipher.init(Cipher.ENCRYPT_MODE, myPrivateKey);
+        byte[] encryptedTimestamp = cipher.doFinal(timeStamp.getBytes());
+
+        dos.writeInt(encryptedTimestamp.length);
+        System.out.println("Tiemstamp length is " + encryptedTimestamp.length);
+        dos.write(encryptedTimestamp);
+    }
+
     public String readSpecificLine(String filePath, String lineOfString) throws IOException {
         File file = new File(filePath);
         FileReader fr = new FileReader(file);
@@ -110,11 +140,17 @@ public class validator {
         return fileContents;
     }
 
+    public String readLine(String filePath) throws IOException {
+        byte[] line = Files.readAllBytes(Paths.get(filePath));
+        String keyDataString = new String(line, StandardCharsets.UTF_8);
+        return keyDataString;
+    }
+
     private static byte[] decode(String data) {
         return Base64.getDecoder().decode(data);
     }
 
-    public void initFromStrings(String PUBLIC_KEY_STRING) {
+    public void initPublicKeyFromString(String PUBLIC_KEY_STRING) {
         try {
             X509EncodedKeySpec keySpecPublic = new X509EncodedKeySpec(decode(PUBLIC_KEY_STRING));
 //            PKCS8EncodedKeySpec keySpecPrivate = new PKCS8EncodedKeySpec(decode(PRIVATE_KEY_STRING));
@@ -123,6 +159,19 @@ public class validator {
 
              serverPublicKey = keyFactory.generatePublic(keySpecPublic);
 //            myPrivateKey = keyFactory.generatePrivate(keySpecPrivate);
+        } catch (Exception ignored) {
+        }
+    }
+
+    public void initPrviateKeyFromString(String PRIVATE_KEY_STRING) {
+        try {
+//            X509EncodedKeySpec keySpecPublic = new X509EncodedKeySpec(decode(PUBLIC_KEY_STRING));
+            PKCS8EncodedKeySpec keySpecPrivate = new PKCS8EncodedKeySpec(decode(PRIVATE_KEY_STRING));
+
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+//            serverPublicKey = keyFactory.generatePublic(keySpecPublic);*/
+            myPrivateKey = keyFactory.generatePrivate(keySpecPrivate);
         } catch (Exception ignored) {
         }
     }
